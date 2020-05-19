@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 
 namespace pastanova
 {
@@ -16,6 +17,7 @@ namespace pastanova
         [STAThread]
         static void Main()
         {
+			Application.EnableVisualStyles();
             Application.Run(new Formulario());
         }
     }
@@ -54,8 +56,15 @@ namespace pastanova
 		ListView listView;
 		CheckedListBox checkedList;
 
+		MonthCalendar mcCalendar;
+
+		DateTimePicker dtPicker;
+
+		ProgressBar pbTest;
+
+		WebBrowser webBrowse;
+
 		public Formulario(){
-			this.BackColor = ColorTranslator.FromHtml("#38323e");
 			this.Text = "Titulo da Janela";
 
 			lblNome = new Label();
@@ -125,7 +134,7 @@ namespace pastanova
 
 			rbSexoFem = new RadioButton();
 			rbSexoFem.Location = new Point(120,15);
-			rbSexoFem.Size = new Size(100,18);
+			rbSexoFem.Size = new Size(70,18);
 			rbSexoFem.Text = "Feminino";
 
 			gpSexo.Controls.Add(rbSexoMasc);
@@ -143,7 +152,7 @@ namespace pastanova
 
 			rbCasado = new RadioButton();
 			rbCasado.Location = new Point(120,15);
-			rbCasado.Size = new Size(100,18);
+			rbCasado.Size = new Size(70,18);
 			rbCasado.Text = "Casado";
 
 			gpEstadoCivil.Controls.Add(rbSolteiro);
@@ -215,7 +224,37 @@ namespace pastanova
 			checkedList.SelectionMode = SelectionMode.One;
 			checkedList.CheckOnClick = true;
 			// checkedList.CheckedItems;
- 
+
+            // DateTime dtInicial = new DateTime(2020,05,16);
+			mcCalendar = new MonthCalendar();
+			mcCalendar.Location = new Point(400, 15);
+			// mcCalendar.MaxSelectionCount = 10;
+			// mcCalendar.MinDate = new DateTime(2019,05,10);
+			// mcCalendar.MaxDate = new DateTime(2020,12,31);
+			// mcCalendar.SelectionRange = new SelectionRange(dtInicial, new DateTime(2020,05,19));
+			
+			dtPicker = new DateTimePicker();
+			dtPicker.Location = new Point(575, 15);
+            dtPicker.Size = new Size(300,15);
+			// dtPicker.Format = DateTimePickerFormat.Time;
+			// dtPicker.Format = DateTimePickerFormat.Custom;
+			// dtPicker.CustomFormat = "dd/MM/yyyy HH:mm";
+			// dtPicker.ShowCheckBox = true;
+   			// dtPicker.ShowUpDown = true;
+
+			pbTest = new ProgressBar();
+			pbTest.Location = new Point(400, 200);
+            pbTest.Size = new Size(300,15);
+			pbTest.Value = 0;
+            pbTest.Maximum = 100;
+            pbTest.Step = 1;
+			// pbTest.Style = ProgressBarStyle.Marquee;
+			// pbTest.MarqueeAnimationSpeed = 30;
+			
+			webBrowse = new WebBrowser();
+			webBrowse.Location = new Point(500, 200);
+			webBrowse.Size = new Size(200,200);
+			webBrowse.Navigate("https://www.google.com");
 
 			this.Controls.Add(lblNome);
 			this.Controls.Add(lblDtnasc);
@@ -233,10 +272,14 @@ namespace pastanova
 			this.Controls.Add(gpEstadoCivil);
 			this.Controls.Add(pbImagem);
 			this.Controls.Add(linkHelp);
-			//this.Controls.Add(listBox);
-			//this.Controls.Add(listView);
-			//this.Controls.Add(checkedList);
-			this.Size = new Size(400,450);
+			// this.Controls.Add(listBox);
+			// this.Controls.Add(listView);
+			// this.Controls.Add(checkedList);
+			this.Controls.Add(mcCalendar);
+			this.Controls.Add(dtPicker);
+			this.Controls.Add(pbTest);
+			this.Controls.Add(webBrowse);
+			this.Size = new Size(900,450);
 
 		}
 
@@ -252,6 +295,11 @@ namespace pastanova
 		private void btnConfirmarClick(object sender, EventArgs e) {
 			
 			string nomeFilmes = "";
+
+            for(int i = 0; i < 100; i++){
+                Thread.Sleep(500);
+                pbTest.PerformStep();
+            }
 
 			string sexo = "Indefinido";
 			foreach(var controle in this.gpSexo.Controls){
@@ -275,10 +323,15 @@ namespace pastanova
 				$"Sexo.: {(this.rbSexoMasc.Checked ? "Masculino" : this.rbSexoFem.Checked ? "Feminino" : "Indefinido" )}\n"+
 				$"Sexo.: { sexo }\n" +
 				$"Filmes.: { nomeFilmes }\n" +
-				$"Estado Civil.: {(this.rbCasado.Checked ? "Casado" : "Solteiro")}",
+				$"Estado Civil.: {(this.rbCasado.Checked ? "Casado" : "Solteiro")}\n" +
+				$"Calendário Inicial: {this.mcCalendar.SelectionRange.Start}\n" +
+                $"Calendário Final: {this.mcCalendar.SelectionRange.End}\n" +
+                $"Picker.: {this.dtPicker.Value}",
 				"Cliente",
 				MessageBoxButtons.OK
 			);
+
+            //pbTest.PerformStep();
 		}
 
 		private void btnCancelarClick(object sender, EventArgs e) {
