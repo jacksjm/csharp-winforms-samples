@@ -6,6 +6,7 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 namespace pastanova
 {
@@ -23,6 +24,12 @@ namespace pastanova
     }
 
 	public class Formulario : Form {
+
+		TabControl tabControl;
+		TabPage tabPagePrincipal;
+		TabPage tabPageSecundario;
+
+		ToolTip toolTipNome = new ToolTip();
 
 		Label lblNome;
 		Label lblDtnasc;
@@ -49,6 +56,8 @@ namespace pastanova
 		Button btnConfirmar;
 		Button btnCancelar;
 
+		Button btnOpenFile;
+
 		PictureBox pbImagem;
 		LinkLabel linkHelp;
 
@@ -64,8 +73,25 @@ namespace pastanova
 
 		WebBrowser webBrowse;
 
+		TrackBar track;
+		TextBox textBox1;
+
 		public Formulario(){
 			this.Text = "Titulo da Janela";
+
+			tabPagePrincipal = new TabPage();
+			tabPagePrincipal.Text = "Principal";
+			tabPagePrincipal.Size = new Size(900, 550);
+
+			tabPageSecundario = new TabPage();
+			tabPageSecundario.Text = "Secundário";
+			tabPageSecundario.Size = new Size(900, 550);
+
+			tabControl = new TabControl();
+            tabControl.Location = new Point(0,35);
+			tabControl.Size = new Size(900, 550);
+            tabControl.Controls.Add(tabPagePrincipal);
+            tabControl.Controls.Add(tabPageSecundario);
 
 			lblNome = new Label();
 			lblNome.Text = "Nome:";
@@ -88,6 +114,12 @@ namespace pastanova
 			txtNome.Location = new Point(180, 20);
 			txtNome.Size = new Size(100,18);
 			txtNome.LoadFile("texto.rtf");
+
+			toolTipNome.AutoPopDelay = 5000;
+			toolTipNome.InitialDelay = 1000;
+			toolTipNome.ReshowDelay = 500;
+			toolTipNome.ShowAlways = true;
+			toolTipNome.SetToolTip(txtNome, "Informe o nome");
 
 			txtDtnasc = new TextBox();
 			txtDtnasc.Location = new Point(180, 60);
@@ -169,6 +201,12 @@ namespace pastanova
 			btnCancelar.Size = new Size(100,30);
 			btnCancelar.Location = new Point(180, 360);
 			btnCancelar.Click += new EventHandler(this.btnCancelarClick);
+
+			btnOpenFile = new Button();
+			btnOpenFile.Text = "Open File";
+			btnOpenFile.Size = new Size(100,30);
+			btnOpenFile.Location = new Point(280, 360);
+			btnOpenFile.Click += new EventHandler(this.btnOpenFileClick);
 
 			pbImagem = new PictureBox();
 			pbImagem.BackColor = Color.Red;
@@ -256,31 +294,133 @@ namespace pastanova
 			webBrowse.Size = new Size(200,200);
 			webBrowse.Navigate("https://www.google.com");
 
-			this.Controls.Add(lblNome);
-			this.Controls.Add(lblDtnasc);
-			this.Controls.Add(lblCpf);
-			this.Controls.Add(lblDiasdev);
-			this.Controls.Add(txtNome);
-			this.Controls.Add(txtDtnasc);
-			this.Controls.Add(txtCpf);
-			this.Controls.Add(cbDiasdev);
-			this.Controls.Add(numDiasDev);
-			this.Controls.Add(btnCancelar);
-			this.Controls.Add(btnConfirmar);
-			this.Controls.Add(chbAtivo);
-			this.Controls.Add(gpSexo);
-			this.Controls.Add(gpEstadoCivil);
-			this.Controls.Add(pbImagem);
-			this.Controls.Add(linkHelp);
-			// this.Controls.Add(listBox);
-			// this.Controls.Add(listView);
-			// this.Controls.Add(checkedList);
-			this.Controls.Add(mcCalendar);
-			this.Controls.Add(dtPicker);
-			this.Controls.Add(pbTest);
-			this.Controls.Add(webBrowse);
-			this.Size = new Size(900,450);
+			track = new TrackBar();
+			track.Location = new System.Drawing.Point(8, 8);
+			track.Size = new System.Drawing.Size(224, 45);
+			track.Maximum = 30;
+			track.TickFrequency = 5;
+			track.LargeChange = 5;
+			track.SmallChange = 5;
+			track.Scroll += new EventHandler(track_Scroll);
 
+			textBox1 = new TextBox();
+			textBox1.Location = new System.Drawing.Point(300,300);
+
+            // Create ToolStripPanel controls.
+            /*ToolStripPanel tspTop = new ToolStripPanel();
+            ToolStripPanel tspBottom = new ToolStripPanel();
+            ToolStripPanel tspLeft = new ToolStripPanel();
+            ToolStripPanel tspRight = new ToolStripPanel();
+
+            // Dock the ToolStripPanel controls to the edges of the form.
+            tspTop.Dock = DockStyle.Top;
+            tspBottom.Dock = DockStyle.Bottom;
+            tspLeft.Dock = DockStyle.Left;
+            tspRight.Dock = DockStyle.Right;
+
+            // Create ToolStrip controls to move among the 
+            // ToolStripPanel controls.
+
+            // Create the "Top" ToolStrip control and add
+            // to the corresponding ToolStripPanel.
+            ToolStrip tsTop = new ToolStrip();
+            tsTop.Items.Add("Top");
+            tsTop.Items.Add("Novo Item");
+            tspTop.Join(tsTop);
+
+            // Create the "Bottom" ToolStrip control and add
+            // to the corresponding ToolStripPanel.
+            ToolStrip tsBottom = new ToolStrip();
+            tsBottom.Items.Add("Bottom");
+            tspBottom.Join(tsBottom);
+
+            // Create the "Right" ToolStrip control and add
+            // to the corresponding ToolStripPanel.
+            ToolStrip tsRight = new ToolStrip();
+            tsRight.Items.Add("Right");
+            tspRight.Join(tsRight);
+
+            // Create the "Left" ToolStrip control and add
+            // to the corresponding ToolStripPanel.
+            ToolStrip tsLeft = new ToolStrip();
+            tsLeft.Items.Add("Left");
+            tspLeft.Join(tsLeft);*/
+
+            // Create a MenuStrip control with a new window.
+            MenuStrip ms = new MenuStrip();
+            ToolStripMenuItem windowMenu = new ToolStripMenuItem("Window");
+            ToolStripMenuItem windowNewMenu = new ToolStripMenuItem("New", null, new EventHandler(windowNewMenu_Click));
+            ToolStripMenuItem windowSaveMenu = new ToolStripMenuItem("Save");
+            windowSaveMenu.Click += new EventHandler(windowsSaveMenu_Click);
+            windowMenu.DropDownItems.Add(windowNewMenu);
+            windowMenu.DropDownItems.Add(windowSaveMenu);
+            ((ToolStripDropDownMenu)(windowMenu.DropDown)).ShowImageMargin = false;
+            ((ToolStripDropDownMenu)(windowMenu.DropDown)).ShowCheckMargin = true;
+
+            // Assign the ToolStripMenuItem that displays 
+            // the list of child forms.
+            ms.MdiWindowListItem = windowMenu;
+
+            // Add the window ToolStripMenuItem to the MenuStrip.
+            ms.Items.Add(windowMenu);
+
+            // Dock the MenuStrip to the top of the form.
+            ms.Dock = DockStyle.Top;
+
+            // The Form.MainMenuStrip property determines the merge target.
+            this.MainMenuStrip = ms;
+
+            // Add the ToolStripPanels to the form in reverse order.
+            /*this.Controls.Add(tspRight);
+            this.Controls.Add(tspLeft);
+            this.Controls.Add(tspBottom);
+            this.Controls.Add(tspTop);*/
+
+            // Add the MenuStrip last.
+            // This is important for correct placement in the z-order.
+            this.Controls.Add(ms);
+
+			tabPageSecundario.Controls.Add(track);
+			tabPageSecundario.Controls.Add(textBox1);
+
+			tabPagePrincipal.Controls.Add(lblNome);
+			tabPagePrincipal.Controls.Add(lblDtnasc);
+			tabPagePrincipal.Controls.Add(lblCpf);
+			tabPagePrincipal.Controls.Add(lblDiasdev);
+			tabPagePrincipal.Controls.Add(txtNome);
+			tabPagePrincipal.Controls.Add(txtDtnasc);
+			tabPagePrincipal.Controls.Add(txtCpf);
+			tabPagePrincipal.Controls.Add(cbDiasdev);
+			tabPagePrincipal.Controls.Add(numDiasDev);
+			tabPagePrincipal.Controls.Add(btnCancelar);
+			tabPagePrincipal.Controls.Add(btnOpenFile);
+			tabPagePrincipal.Controls.Add(btnConfirmar);
+			tabPagePrincipal.Controls.Add(chbAtivo);
+			tabPagePrincipal.Controls.Add(gpSexo);
+			tabPagePrincipal.Controls.Add(gpEstadoCivil);
+			tabPagePrincipal.Controls.Add(pbImagem);
+			tabPagePrincipal.Controls.Add(linkHelp);
+			// tabPagePrincipal.Controls.Add(listBox);
+			// tabPagePrincipal.Controls.Add(listView);
+			// tabPagePrincipal.Controls.Add(checkedList);
+			tabPagePrincipal.Controls.Add(mcCalendar);
+			tabPagePrincipal.Controls.Add(dtPicker);
+			tabPagePrincipal.Controls.Add(pbTest);
+			tabPagePrincipal.Controls.Add(webBrowse);
+			this.Controls.Add(tabControl);
+			this.Size = new Size(900,550);
+
+		}
+
+        private void windowNewMenu_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("New!!!!");
+        }
+        private void windowsSaveMenu_Click(object sender, EventArgs e){
+            MessageBox.Show("Save!!!!");
+        }
+		private void track_Scroll(object sender, EventArgs e) { // Display the trackbar value in the text box. 
+			textBox1.Text = "" + track.Value;
 		}
 
 		private void helpLink(object sender, LinkLabelLinkClickedEventArgs e){
@@ -336,6 +476,21 @@ namespace pastanova
 
 		private void btnCancelarClick(object sender, EventArgs e) {
 			this.Close();
+		}
+
+		private void btnOpenFileClick(object sender, EventArgs e) {
+			OpenFileDialog dialog = new OpenFileDialog();
+            //dialog.InitialDirectory = @"C:\";
+            //dialog.Multiselect = true;
+            dialog.Title = "Selecionar arquivos...";
+            dialog.Filter = "Arquivo de Texto (*.TXT; *.RTF) |abrirarquivo.txt";
+			if (dialog.ShowDialog() != DialogResult.Cancel){
+				StreamReader arquivo = new StreamReader(dialog.FileName);
+                string conteudo = arquivo.ReadLine();
+                arquivo.Dispose();
+
+                MessageBox.Show(conteudo);
+			}
 		}
 	}
 }
